@@ -3,40 +3,26 @@ import Link from "next/link";
 
 export default function ProductCard({ product }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [loading, setLoading] = useState(true); 
 
   const images = product.images || [];
   const currentImage = images[currentImageIndex];
 
   const nextImage = () => {
-    setLoading(true); 
     setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
   };
 
   const prevImage = () => {
-    setLoading(true); 
     setCurrentImageIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length);
-  };
-
-  const handleImageLoad = () => {
-    setLoading(false); 
   };
 
   return (
     <div className="border p-4 rounded-md shadow-lg relative">
       {/* Image with navigation arrows */}
       <div className="relative">
-        {loading && (
-          <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
-            <div className="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
-          </div>
-        )}
-
         <img
-          className={`w-full h-48 object-cover mb-4 ${loading ? 'hidden' : ''}`}
+          className="w-full h-48 object-cover mb-4"
           src={currentImage}
           alt={product.title}
-          onLoad={handleImageLoad} 
         />
 
         {/* Previous Arrow */}
