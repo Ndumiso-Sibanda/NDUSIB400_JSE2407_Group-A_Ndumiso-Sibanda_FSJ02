@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import ProductCard from '../components/ProductCard';
 import Pagination from '../components/Pagination';
 import Spinner from '../components/Spinner'; 
+import SortSelect from '../components/SortSelect'; 
 
 const API_URL = 'https://next-ecommerce-api.vercel.app/products';
 
@@ -35,11 +36,12 @@ const categories = [
   "womens-watches"
 ];
 
-async function fetchProducts({ search = '', category = '', page = 1, limit = 20 }) {
+async function fetchProducts({ search = '', category = '', sort = '', page = 1, limit = 20 }) {
   try {
     const query = new URLSearchParams({
       search,
       category,
+      sort,  
       skip: (page - 1) * limit,
       limit,
     });
@@ -70,6 +72,7 @@ export default function ProductsPage({ searchParams }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.search || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.category || '');
+  const [sortOrder, setSortOrder] = useState(searchParams.sort || ''); 
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -78,6 +81,7 @@ export default function ProductsPage({ searchParams }) {
         const fetchedProducts = await fetchProducts({
           search: searchQuery,
           category: selectedCategory,
+          sort: sortOrder, 
           page,
         });
         setProducts(fetchedProducts || []);
@@ -90,15 +94,15 @@ export default function ProductsPage({ searchParams }) {
     };
 
     loadProducts();
-  }, [searchQuery, selectedCategory, page]);
+  }, [searchQuery, selectedCategory, sortOrder, page]);
 
   const updateUrl = () => {
-    router.push(`/products?search=${searchQuery || ''}&category=${selectedCategory || ''}&page=${page}`);
+    router.push(`/products?search=${searchQuery || ''}&category=${selectedCategory || ''}&sort=${sortOrder}&page=${page}`);
   };
 
   useEffect(() => {
     updateUrl();
-  }, [searchQuery, selectedCategory, page]);
+  }, [searchQuery, selectedCategory, sortOrder, page]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
@@ -107,6 +111,11 @@ export default function ProductsPage({ searchParams }) {
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
+    setPage(1); 
+  };
+
+  const handleSortChange = (sort) => {
+    setSortOrder(sort);
     setPage(1); 
   };
 
@@ -131,6 +140,8 @@ export default function ProductsPage({ searchParams }) {
           </option>
         ))}
       </select>
+
+      <SortSelect sortOrder={sortOrder} onSortChange={handleSortChange} /> 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {products.map((product) => (
