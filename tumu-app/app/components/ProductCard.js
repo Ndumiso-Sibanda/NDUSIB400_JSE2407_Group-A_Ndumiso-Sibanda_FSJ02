@@ -20,7 +20,7 @@ export default function ProductCard({ product }) {
       {/* Image with navigation arrows */}
       <div className="relative w-full h-64">
         <img
-          className="w-full h-full object-contain mb-4" // Adjusted to 'object-contain'
+          className="w-full h-full object-contain mb-4" 
           src={currentImage}
           alt={product.title}
         />
