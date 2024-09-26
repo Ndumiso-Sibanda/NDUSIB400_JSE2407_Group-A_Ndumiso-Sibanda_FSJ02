@@ -8,7 +8,6 @@ import Spinner from '../components/Spinner';
 
 const API_URL = 'https://next-ecommerce-api.vercel.app/products';
 
-// Complete list of categories
 const categories = [
   "beauty",
   "fragrances",
@@ -36,24 +35,23 @@ const categories = [
   "womens-watches"
 ];
 
-async function fetchProducts({ search = '', category = '', sort = '', page = 1, limit = 20 }) {
+async function fetchProducts({ search = '', category = '', page = 1, limit = 20 }) {
   try {
     const query = new URLSearchParams({
       search,
       category,
-      sort,
       skip: (page - 1) * limit,
       limit,
     });
 
     const fetchUrl = `${API_URL}?${query.toString()}`;
-    console.log('Fetching URL:', fetchUrl); // Log the URL for debugging
+    console.log('Fetching URL:', fetchUrl); 
 
     const res = await fetch(fetchUrl);
 
     if (!res.ok) {
       const errorMessage = await res.text();
-      console.error('API Response Error:', errorMessage); // Log the error response
+      console.error('API Response Error:', errorMessage); 
       throw new Error(`Failed to fetch products: ${res.status} - ${errorMessage}`);
     }
     
@@ -72,7 +70,6 @@ export default function ProductsPage({ searchParams }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.search || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.category || '');
-  const [sortOrder, setSortOrder] = useState(searchParams.sort || '');
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -81,7 +78,6 @@ export default function ProductsPage({ searchParams }) {
         const fetchedProducts = await fetchProducts({
           search: searchQuery,
           category: selectedCategory,
-          sort: sortOrder,
           page,
         });
         setProducts(fetchedProducts || []);
@@ -94,29 +90,24 @@ export default function ProductsPage({ searchParams }) {
     };
 
     loadProducts();
-  }, [searchQuery, selectedCategory, sortOrder, page]);
+  }, [searchQuery, selectedCategory, page]);
 
   const updateUrl = () => {
-    router.push(`/products?search=${searchQuery || ''}&category=${selectedCategory || ''}&sort=${sortOrder || ''}&page=${page || 1}`);
+    router.push(`/products?search=${searchQuery || ''}&category=${selectedCategory || ''}&page=${page}`);
   };
 
   useEffect(() => {
     updateUrl();
-  }, [searchQuery, selectedCategory, sortOrder, page]);
+  }, [searchQuery, selectedCategory, page]);
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setPage(1); // Reset to page 1
+    setPage(1); 
   };
 
   const handleCategoryChange = (e) => {
     setSelectedCategory(e.target.value);
-    setPage(1); // Reset to page 1
-  };
-
-  const handleSortChange = (e) => {
-    setSortOrder(e.target.value);
-    setPage(1); // Reset to page 1 on sort change
+    setPage(1); 
   };
 
   if (loading) return <Spinner />;
@@ -136,15 +127,9 @@ export default function ProductsPage({ searchParams }) {
         <option value="">All Categories</option>
         {categories.map((category) => (
           <option key={category} value={category}>
-            {category.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())} {/* Format category name */}
+            {category.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())} 
           </option>
         ))}
-      </select>
-
-      <select value={sortOrder} onChange={handleSortChange} className="mb-4 p-2 border border-gray-300 rounded">
-        <option value="">Sort By</option>
-        <option value="price-asc">Price (Low to High)</option>
-        <option value="price-desc">Price (High to Low)</option>
       </select>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
