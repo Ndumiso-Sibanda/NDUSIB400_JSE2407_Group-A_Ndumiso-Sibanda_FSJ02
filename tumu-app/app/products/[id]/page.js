@@ -14,7 +14,9 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [reviews, setReviews] = useState([]); 
+  const [reviews, setReviews] = useState([]);
+  const [dateSortOption, setDateSortOption] = useState("");  
+  const [ratingSortOption, setRatingSortOption] = useState("");  
 
   useEffect(() => {
     if (!id) return;
@@ -25,7 +27,7 @@ export default function ProductDetail() {
         if (!res.ok) throw new Error("Failed to fetch product");
         const data = await res.json();
         setProduct(data);
-        setReviews(data.reviews || []); 
+        setReviews(data.reviews || []);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -36,6 +38,31 @@ export default function ProductDetail() {
 
     fetchProduct();
   }, [id]);
+
+  
+  const sortReviews = () => {
+    let sortedReviews = [...reviews];
+
+    
+    if (dateSortOption === "newest") {
+      sortedReviews.sort((a, b) => new Date(b.date) - new Date(a.date)); 
+    } else if (dateSortOption === "oldest") {
+      sortedReviews.sort((a, b) => new Date(a.date) - new Date(b.date)); 
+    }
+
+    
+    if (ratingSortOption === "rating-high") {
+      sortedReviews.sort((a, b) => b.rating - a.rating); 
+    } else if (ratingSortOption === "rating-low") {
+      sortedReviews.sort((a, b) => a.rating - b.rating); 
+    }
+
+    setReviews(sortedReviews);
+  };
+
+  useEffect(() => {
+    sortReviews();
+  }, [dateSortOption, ratingSortOption]); 
 
   if (loading) return <Spinner />;
   if (error) return <p className="text-center text-red-500">Error: {error}</p>;
@@ -97,9 +124,40 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* Reviews Section */}
+     
       <div className="mt-8">
         <h3 className="text-2xl font-semibold mb-4">Reviews</h3>
+
+        
+        <div className="mb-4">
+          <label htmlFor="sort-date" className="mr-2">Sort by Date:</label>
+          <select
+            id="sort-date"
+            value={dateSortOption}
+            onChange={(e) => setDateSortOption(e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          >
+            <option value="">Default</option>
+            <option value="newest">Date (Newest)</option>
+            <option value="oldest">Date (Oldest)</option>
+          </select>
+        </div>
+
+       
+        <div className="mb-4">
+          <label htmlFor="sort-rating" className="mr-2">Sort by Rating:</label>
+          <select
+            id="sort-rating"
+            value={ratingSortOption}
+            onChange={(e) => setRatingSortOption(e.target.value)}
+            className="p-2 border border-gray-300 rounded"
+          >
+            <option value="">Default</option>
+            <option value="rating-high">Rating (Highest to Lowest)</option>
+            <option value="rating-low">Rating (Lowest to Highest)</option>
+          </select>
+        </div>
+
         {reviews.length > 0 ? (
           <div className="space-y-4">
             {reviews.map((review, index) => (
@@ -108,6 +166,9 @@ export default function ProductDetail() {
                 <p className="text-sm text-gray-600">{review.comment}</p>
                 <p className="text-sm text-yellow-500">
                   Rating: {review.rating} / 5
+                </p>
+                <p className="text-sm text-gray-400">
+                  {new Date(review.date).toLocaleDateString()}
                 </p>
               </div>
             ))}
