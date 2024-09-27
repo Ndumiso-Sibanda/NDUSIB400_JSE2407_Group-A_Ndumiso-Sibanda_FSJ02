@@ -36,12 +36,12 @@ const categories = [
   "womens-watches"
 ];
 
-async function fetchProducts({ search = '', category = '', sort = '', page = 1, limit = 20 }) {
+
+async function fetchProducts({ search = '', category = '', page = 1, limit = 20 }) {
   try {
     const query = new URLSearchParams({
       search,
       category,
-      sort,  
       skip: (page - 1) * limit,
       limit,
     });
@@ -81,10 +81,18 @@ export default function ProductsPage({ searchParams }) {
         const fetchedProducts = await fetchProducts({
           search: searchQuery,
           category: selectedCategory,
-          sort: sortOrder, 
           page,
         });
-        setProducts(fetchedProducts || []);
+
+       
+        let sortedProducts = [...fetchedProducts];
+        if (sortOrder === 'price-asc') {
+          sortedProducts = sortedProducts.sort((a, b) => a.price - b.price);
+        } else if (sortOrder === 'price-desc') {
+          sortedProducts = sortedProducts.sort((a, b) => b.price - a.price);
+        }
+
+        setProducts(sortedProducts || []);
         setError(null);
       } catch (err) {
         setError(err.message);
@@ -141,6 +149,7 @@ export default function ProductsPage({ searchParams }) {
         ))}
       </select>
 
+     
       <SortSelect sortOrder={sortOrder} onSortChange={handleSortChange} /> 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
